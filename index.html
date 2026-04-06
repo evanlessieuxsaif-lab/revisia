@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RevIA — Révise avec l'IA</title>
+<meta name="theme-color" content="#0a0a0f">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  --bg:#0a0a0f; --surface:#131318; --surface2:#1a1a22;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --accent:#7c6af7; --accent2:#f7c26a; --green:#4ade80; --red:#f87171; --blue:#60a5fa;
+  --text:#f0f0f8; --muted:#6b6b82; --radius:14px;
+  --nav-h:68px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 5%,rgba(124,106,247,0.1) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 90% 90%,rgba(247,194,106,0.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+/* ═══ SPLASH ═══ */
+#splash{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s;}
+.splash-logo{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;opacity:0;animation:splashIn 0.8s 0.3s ease forwards;}
+.splash-logo span{color:var(--accent);}
+.splash-bar{width:160px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;opacity:0;animation:splashIn 0.5s 0.7s ease forwards;}
+.splash-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;animation:splashFill 1.4s 0.8s ease forwards;}
+.splash-sub{font-size:13px;color:var(--muted);opacity:0;animation:splashIn 0.5s 1s ease forwards;}
+@keyframes splashIn{to{opacity:1;}}
+@keyframes splashFill{to{width:100%;}}
+
+/* ═══ ONBOARDING ═══ */
+#onboarding{position:fixed;inset:0;z-index:1800;background:var(--bg);overflow-y:auto;display:none;align-items:flex-start;justify-content:center;padding:20px;}
+#onboarding.show{display:flex;}
+.ob-wrap{max-width:500px;width:100%;padding:40px 0 60px;}
+.ob-prog{display:flex;gap:6px;margin-bottom:36px;}
+.ob-dot{height:3px;flex:1;background:var(--surface2);border-radius:2px;transition:background 0.3s;}
+.ob-dot.done{background:var(--accent);}
+.ob-step{display:none;animation:fadeUp 0.4s ease both;}
+.ob-step.active{display:block;}
+.ob-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px;}
+.ob-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.ci{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;font-size:13px;}
+.ci:hover{border-color:rgba(124,106,247,0.3);}
+.ci.on{background:rgba(124,106,247,0.12);border-color:var(--accent);color:var(--accent);}
+.ci .ico{font-size:18px;flex-shrink:0;}
+.ci .cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--muted);margin-left:auto;flex-shrink:0;transition:all 0.2s;}
+.ci.on .cb{background:var(--accent);border-color:var(--accent);}
+
+.ob-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:13px;padding:12px 14px;outline:none;transition:border-color 0.2s;margin-bottom:10px;}
+.ob-input:focus{border-color:rgba(124,106,247,0.4);}
+.ob-input::placeholder{color:var(--muted);}
+.ob-hint{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+.ob-hint a{color:var(--accent);text-decoration:none;}
+
+.free-box{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--green);line-height:1.6;margin-bottom:16px;}
+
+.btn-p{width:100%;padding:15px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 24px rgba(124,106,247,0.3);}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(124,106,247,0.4);}
+.btn-skip{width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:8px;}
+.btn-skip:hover{color:var(--text);}
+
+/* ═══ TUTORIAL ═══ */
+#tutorial{position:fixed;inset:0;z-index:1700;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
+#tutorial.show{display:flex;}
+.tuto-card{max-width:420px;width:100%;background:var(--surface);border:1px solid rgba(124,106,247,0.3);border-radius:20px;padding:28px;animation:fadeUp 0.4s ease both;text-align:center;}
+.tuto-step-num{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
+.tuto-icon{font-size:48px;margin-bottom:14px;}
+.tuto-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:8px;}
+.tuto-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px;}
+.tuto-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
+.tuto-dot{width:7px;height:7px;border-radius:50%;background:var(--surface2);transition:background 0.2s;}
+.tuto-dot.on{background:var(--accent);}
+.tuto-btns{display:flex;gap:8px;}
+.tuto-next{flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.tuto-next:hover{background:#6b59e8;}
+.tuto-skip-btn{padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s;}
+.tuto-skip-btn:hover{color:var(--text);}
+
+/* ═══ MAIN APP ═══ */
+#app{display:none;padding-bottom:var(--nav-h);}
+#app.show{display:block;}
+
+/* ═══ TOP BAR ═══ */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 16px;}
+.topbar-inner{max-width:820px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.tb-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.tb-logo span{color:var(--accent);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.xp-pill{display:flex;align-items:center;gap:4px;background:rgba(247,194,106,0.1);border:1px solid rgba(247,194,106,0.2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--accent2);font-weight:600;}
+.streak-pill{font-size:12px;font-weight:600;}
+
+/* ═══ BOTTOM NAV ═══ */
+.botnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:rgba(13,13,20,0.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 8px 6px;
+}
+.bn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:8px 4px;border:none;background:transparent;
+  cursor:pointer;transition:all 0.2s;border-radius:12px;min-height:52px;
+}
+.bn:hover{background:var(--surface);}
+.bn.active{background:rgba(124,106,247,0.12);}
+.bn-icon{font-size:20px;line-height:1;}
+.bn-label{font-size:10px;color:var(--muted);font-family:'Instrument Sans',sans-serif;font-weight:500;transition:color 0.2s;}
+.bn.active .bn-label{color:var(--accent);}
+
+/* ═══ CONTENT ═══ */
+.content{max-width:820px;margin:0 auto;padding:24px 16px 20px;position:relative;z-index:1;}
+.panel{display:none;animation:fadeUp 0.3s ease both;}
+.panel.active{display:block;}
+
+/* ═══ TOOL SUBTABS ═══ */
+.subtabs{display:flex;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;}
+.subtabs::-webkit-scrollbar{display:none;}
+.stab{flex:1;min-width:fit-content;padding:8px 10px;border:none;background:transparent;color:var(--muted);font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:500;border-radius:9px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.stab:hover{color:var(--text);}
+.stab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.card-ttl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.card-ttl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+textarea,input[type=text],input[type=date]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:13px;padding:11px 13px;outline:none;transition:border-color 0.2s;resize:vertical;}
+textarea:focus,input:focus{border-color:rgba(124,106,247,0.4);}
+textarea::placeholder,input::placeholder{color:var(--muted);}
+textarea{min-height:120px;}
+
+.opts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.opts-lbl{font-size:11px;color:var(--muted);}
+.opt{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;border-radius:8px;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif;}
+.opt.sel{background:rgba(124,106,247,0.15);border-color:rgba(124,106,247,0.4);color:var(--accent);}
+
+/* ═══ UPLOAD ═══ */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:10px;position:relative;overflow:hidden;}
+.upload-zone:hover,.upload-zone.dragover{border-color:rgba(124,106,247,0.5);background:rgba(124,106,247,0.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:22px;margin-bottom:4px;}
+.upload-txt{font-size:12px;color:var(--muted);}
+.upload-sub{font-size:10px;color:var(--muted);margin-top:2px;opacity:0.6;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;display:flex;align-items:center;gap:5px;}
+.chip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+
+/* ═══ LOADING ═══ */
+.upload-loading{display:none;text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;}
+.upload-loading.show{display:block;}
+.upload-loading .sp{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px;}
+.upload-loading p{font-size:13px;color:var(--muted);}
+.upload-loading .ul-prog{width:100%;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:8px;}
+.upload-loading .ul-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;animation:ulFill 2s ease forwards;}
+@keyframes ulFill{0%{width:0%}70%{width:80%}100%{width:95%}}
+
+.loading{display:none;text-align:center;padding:36px 20px;}
+.loading.show{display:block;}
+.sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px;}
+.loading p{font-size:13px;color:var(--muted);}
+.loading-steps{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+.ls{font-size:11px;color:var(--muted);opacity:0;transition:opacity 0.3s;}
+.ls.on{opacity:1;color:var(--accent);}
+
+/* ═══ GENERATE BTN ═══ */
+.gen-btn{width:100%;margin-top:12px;padding:14px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(124,106,247,0.25);display:flex;align-items:center;justify-content:center;gap:8px;}
+.gen-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(124,106,247,0.4);}
+.gen-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ═══ RESULT ═══ */
+.result{display:none;}
+.result.show{display:block;animation:fadeUp 0.4s ease both;}
+.res-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.res-ttl{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.res-acts{display:flex;gap:6px;}
+.act{padding:6px 11px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:11px;border-radius:8px;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif;}
+.act:hover{color:var(--text);}
+.act.ok{color:var(--green);border-color:rgba(74,222,128,0.3);}
+
+.out-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;line-height:1.75;font-size:13.5px;}
+.out-box h2{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);margin:16px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.out-box h2:first-child{margin-top:0;}
+.out-box h3{font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--accent2);}
+.out-box ul{padding-left:18px;}
+.out-box li{margin-bottom:4px;}
+.out-box strong{color:var(--text);font-weight:600;}
+.out-box p{margin-bottom:8px;}
+
+/* ═══ QUIZ ═══ */
+.qwrap{display:flex;flex-direction:column;gap:10px;}
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;animation:fadeUp 0.3s ease both;}
+.qmeta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
+.qtext{font-size:14px;font-weight:500;line-height:1.5;margin-bottom:12px;}
+.qopts{display:flex;flex-direction:column;gap:6px;}
+.qopt{padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:all 0.2s;text-align:left;font-family:'Instrument Sans',sans-serif;}
+.qopt:hover:not(:disabled){border-color:rgba(124,106,247,0.4);background:rgba(124,106,247,0.07);}
+.qopt.ok{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.4);color:var(--green);}
+.qopt.ko{background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.3);color:var(--red);}
+.qexp{margin-top:8px;padding:8px 11px;background:rgba(247,194,106,0.07);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;font-size:12px;color:var(--accent2);line-height:1.5;display:none;}
+.qexp.show{display:block;}
+.score-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.score-big{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--accent);}
+.score-prog{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.8s ease;}
+
+/* ═══ CHAT ═══ */
+.chat-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.chat-msgs{height:360px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.msg{max-width:85%;animation:fadeUp 0.3s ease both;}
+.msg.user{align-self:flex-end;}
+.msg.ai{align-self:flex-start;}
+.msg-b{padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.6;}
+.msg.user .msg-b{background:var(--accent);color:#fff;border-radius:14px 14px 4px 14px;}
+.msg.ai .msg-b{background:var(--surface2);color:var(--text);border-radius:14px 14px 14px 4px;}
+.chat-typing{color:var(--muted);font-size:12px;padding:6px 14px;display:none;}
+.chat-in{display:flex;gap:7px;padding:10px;border-top:1px solid var(--border);}
+.chat-field{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;resize:none;height:42px;}
+.chat-field:focus{border-color:rgba(124,106,247,0.4);}
+.chat-send{padding:0 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;cursor:pointer;font-size:16px;transition:all 0.2s;}
+.chat-send:hover{background:#6b59e8;}
+
+/* ═══ POMODORO ═══ */
+.pomo-wrap{text-align:center;padding:10px 0 20px;}
+.pomo-modes{display:flex;gap:7px;justify-content:center;margin-bottom:20px;}
+.pmode{padding:7px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s;}
+.pmode.sel{background:rgba(124,106,247,0.12);border-color:var(--accent);color:var(--accent);}
+.pring{position:relative;width:190px;height:190px;margin:0 auto 20px;}
+.pring svg{transform:rotate(-90deg);}
+.pring-track{fill:none;stroke:var(--surface2);stroke-width:8;}
+.pring-prog{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+.pring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ptime{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;}
+.psub{font-size:11px;color:var(--muted);margin-top:2px;}
+.pbtns{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
+.pbtn{padding:10px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;transition:all 0.2s;}
+.pbtn.start{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(124,106,247,0.3);}
+.pbtn.reset{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.pbtn:hover{transform:translateY(-1px);}
+.sound-grid{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
+.snd{padding:8px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif;}
+.snd.on{background:rgba(124,106,247,0.12);border-color:rgba(124,106,247,0.4);color:var(--accent);}
+
+/* ═══ TODO ═══ */
+.todo-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.tcat{padding:5px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.tcat.sel{background:rgba(124,106,247,0.1);border-color:var(--accent);color:var(--accent);}
+.todo-in-row{display:flex;gap:7px;margin-bottom:14px;}
+.tadd{padding:10px 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;cursor:pointer;font-size:18px;transition:all 0.2s;}
+.tadd:hover{background:#6b59e8;}
+.tlist{display:flex;flex-direction:column;gap:7px;}
+.titem{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:9px;transition:all 0.2s;animation:fadeUp 0.3s ease both;}
+.titem.done{opacity:0.45;}
+.tchk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;font-size:11px;color:transparent;}
+.titem.done .tchk{background:var(--green);border-color:var(--green);color:#fff;}
+.ttxt{flex:1;font-size:13px;}
+.titem.done .ttxt{text-decoration:line-through;color:var(--muted);}
+.tdel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;opacity:0;transition:opacity 0.2s;padding:0;}
+.titem:hover .tdel{opacity:1;}
+
+/* ═══ CALENDAR ═══ */
+.cal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.cal-nav{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text);cursor:pointer;font-size:14px;transition:all 0.2s;}
+.cal-nav:hover{border-color:var(--accent);}
+.cal-month-ttl{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-dh{text-align:center;font-size:10px;color:var(--muted);text-transform:uppercase;padding:4px;letter-spacing:0.04em;}
+.cal-d{aspect-ratio:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all 0.2s;position:relative;}
+.cal-d:hover{border-color:rgba(124,106,247,0.3);}
+.cal-d.today{border-color:var(--accent);color:var(--accent);font-weight:700;}
+.cal-d.has-ev::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;background:var(--accent2);border-radius:50%;}
+.cal-d.other{opacity:0.25;}
+.cal-ev{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;animation:fadeUp 0.3s ease both;}
+.cal-ev-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+
+/* ═══ LIBRARY ═══ */
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.lib-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all 0.2s;animation:fadeUp 0.3s ease both;}
+.lib-card:hover{border-color:rgba(124,106,247,0.3);transform:translateY(-2px);}
+.lib-icon{font-size:22px;margin-bottom:8px;}
+.lib-name{font-weight:600;font-size:13px;margin-bottom:3px;line-height:1.4;}
+.lib-meta{font-size:11px;color:var(--muted);}
+.lib-badge{display:inline-block;margin-top:7px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;}
+.bt-fiche{background:rgba(124,106,247,0.15);color:var(--accent);}
+.bt-quiz{background:rgba(96,165,250,0.15);color:var(--blue);}
+.bt-oral{background:rgba(74,222,128,0.12);color:var(--green);}
+.bt-dissert{background:rgba(247,194,106,0.15);color:var(--accent2);}
+.bt-mindmap{background:rgba(248,113,113,0.12);color:var(--red);}
+
+/* ═══ STATS ═══ */
+.stats-g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px;}
+.stat-c{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.stat-v{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--accent);}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.badges-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:9px;}
+.bdg{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;text-align:center;transition:all 0.2s;}
+.bdg.unlocked{border-color:rgba(247,194,106,0.3);background:rgba(247,194,106,0.04);}
+.bdg.locked{opacity:0.35;filter:grayscale(1);}
+.bdg-icon{font-size:26px;margin-bottom:5px;}
+.bdg-name{font-size:10px;color:var(--muted);font-weight:600;}
+
+/* ═══ PAYWALL ═══ */
+#paywall{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;}
+#paywall.show{display:flex;}
+.pw-modal{background:var(--surface);border:1px solid rgba(124,106,247,0.3);border-radius:20px;padding:28px;max-width:400px;width:100%;animation:fadeUp 0.4s ease both;text-align:center;}
+.pw-modal h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:7px;}
+.pw-modal p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.plans{display:flex;gap:8px;margin-bottom:18px;}
+.plan{flex:1;background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.plan:hover,.plan.sel{border-color:var(--accent);}
+.plan.pop{border-color:var(--accent2);}
+.plan-nm{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;}
+.plan-pr{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.plan-per{font-size:11px;color:var(--muted);}
+.plan-badge{font-size:10px;background:var(--accent2);color:#000;border-radius:4px;padding:1px 5px;font-weight:700;display:inline-block;margin-top:3px;}
+.plan-feats{font-size:11px;color:var(--muted);margin-top:7px;text-align:left;line-height:1.7;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:480px){
+  .cg{grid-template-columns:1fr;}
+  .plans{flex-direction:column;}
+  .stats-g{grid-template-columns:repeat(3,1fr);}
+  .lib-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">Rev<span>IA</span></div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="splash-sub">Ton assistant de révision intelligent ⚡</div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+<div class="ob-wrap">
+  <div class="ob-prog">
+    <div class="ob-dot done" id="od1"></div>
+    <div class="ob-dot" id="od2"></div>
+    <div class="ob-dot" id="od3"></div>
+    <div class="ob-dot" id="od4"></div>
+  </div>
+
+  <!-- Step 1 : niveau -->
+  <div class="ob-step active" id="os1">
+    <div class="ob-title">Bienvenue sur RevIA ⚡</div>
+    <div class="ob-sub">L'IA qui transforme tes cours en fiches, quiz, plans d'oral et disserts en quelques secondes. Tu es en quelle classe ?</div>
+    <div class="cg">
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🏫</span>Lycée / BTS<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🎓</span>Licence<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">📚</span>Master<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🏢</span>École de commerce<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">⚕️</span>Médecine / Para<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">⚖️</span>Droit<span class="cb"></span></div>
+    </div>
+    <button class="btn-p" onclick="goOB(2)">Continuer →</button>
+  </div>
+
+  <!-- Step 2 : matières -->
+  <div class="ob-step" id="os2">
+    <div class="ob-title">Tes matières 📖</div>
+    <div class="ob-sub">Sélectionne tes matières pour personnaliser l'expérience.</div>
+    <div class="cg">
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">📐</span>Mathématiques<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">📝</span>Français / Lettres<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">📜</span>Histoire-Géographie<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">📊</span>Économie / SES<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">⚗️</span>Sciences (SVT/PC)<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🧠</span>Philosophie<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">⚖️</span>Droit<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">💼</span>Management<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🌍</span>Géopolitique<span class="cb"></span></div>
+      <div class="ci" onclick="toggleCI(this)"><span class="ico">🗣️</span>Anglais / Langues<span class="cb"></span></div>
+    </div>
+    <input class="ob-input" type="text" id="ob-autre" placeholder="Autre matière ? Écris ici...">
+    <button class="btn-p" onclick="goOB(3)">Continuer →</button>
+    <button class="btn-skip" onclick="goOB(3)">Passer</button>
+  </div>
+
+  <!-- Step 3 : objectif -->
+  <div class="ob-step" id="os3">
+    <div class="ob-title">Ton objectif 🎯</div>
+    <div class="ob-sub">Pourquoi tu utilises RevIA ?</div>
+    <div class="cg">
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">📝</span>Préparer mes partiels<span class="cb"></span></div>
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">🎤</span>Préparer un oral<span class="cb"></span></div>
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">✍️</span>Faire des dissertations<span class="cb"></span></div>
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">⚡</span>Gagner du temps<span class="cb"></span></div>
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">📈</span>Améliorer mes notes<span class="cb"></span></div>
+      <div class="ci" onclick="singleCI(this,'goal')"><span class="ico">🔄</span>Réviser régulièrement<span class="cb"></span></div>
+    </div>
+    <button class="btn-p" onclick="goOB(4)">Continuer →</button>
+  </div>
+
+  <!-- Step 4 : clé API -->
+  <div class="ob-step" id="os4">
+    <div class="ob-title">Dernière étape 🔑</div>
+    <div class="free-box">🎁 <strong>Essai gratuit inclus</strong> — 4 générations offertes, aucune carte requise.</div>
+    <div class="ob-sub">Pour utiliser RevIA sans limite, entre ta clé API Claude. C'est gratuit à créer.</div>
+    <input class="ob-input" type="password" id="ob-api" placeholder="sk-ant-api03-...">
+    <div class="ob-hint">Clé gratuite sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys. Stockée uniquement dans ton navigateur.</div>
+    <button class="btn-p" onclick="finishOB()">Commencer à réviser ⚡</button>
+    <button class="btn-skip" onclick="finishOB()">Commencer l'essai gratuit</button>
+  </div>
+</div>
+</div>
+
+<!-- TUTORIAL -->
+<div id="tutorial">
+  <div class="tuto-card">
+    <div class="tuto-step-num" id="tuto-num">Étape 1 / 5</div>
+    <div class="tuto-icon" id="tuto-icon">🛠️</div>
+    <div class="tuto-title" id="tuto-title">Les Outils IA</div>
+    <div class="tuto-desc" id="tuto-desc">Génère fiches, quiz, prép d'oral et dissertations en quelques secondes. Colle ton cours ou uploade un fichier PDF.</div>
+    <div class="tuto-dots" id="tuto-dots"></div>
+    <div class="tuto-btns">
+      <button class="tuto-skip-btn" onclick="closeTuto()">Passer</button>
+      <button class="tuto-next" id="tuto-next-btn" onclick="nextTuto()">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYWALL -->
+<div id="paywall">
+  <div class="pw-modal">
+    <div style="font-size:32px;margin-bottom:10px">🔒</div>
+    <h2>Essai gratuit terminé</h2>
+    <p>Tu as utilisé tes 4 générations gratuites.<br>Entre ta clé API ou prends un abonnement.</p>
+    <div style="margin-bottom:14px">
+      <input class="ob-input" type="password" id="pw-api" placeholder="Clé API Claude (sk-ant-api03-...)">
+    </div>
+    <div class="plans">
+      <div class="plan" onclick="selPlan(this,'student')">
+        <div class="plan-nm">Étudiant</div>
+        <div class="plan-pr">2€</div>
+        <div class="plan-per">/mois</div>
+        <div class="plan-feats">✓ Illimité<br>✓ Toutes les fonctions</div>
+      </div>
+      <div class="plan pop" onclick="selPlan(this,'premium')">
+        <div class="plan-nm">Premium</div>
+        <div class="plan-pr">5€</div>
+        <div class="plan-per">/mois</div>
+        <div class="plan-badge">⭐ Populaire</div>
+        <div class="plan-feats">✓ Illimité<br>✓ Partage de fiches<br>✓ Support prioritaire</div>
+      </div>
+    </div>
+    <button class="btn-p" onclick="unlockKey()">Déverrouiller avec ma clé</button>
+    <button class="btn-skip" onclick="document.getElementById('paywall').classList.remove('show')">Pas maintenant</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="tb-logo">Rev<span>IA</span></div>
+      <div class="tb-right">
+        <div class="xp-pill">⚡ <span id="xp-val">0</span> XP</div>
+        <div class="streak-pill">🔥 <span id="streak-val">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- TOOLS -->
+    <div class="panel active" id="p-tools">
+      <div class="subtabs" id="tool-tabs">
+        <button class="stab active" onclick="showTool('fiche',this)">📄 Fiche</button>
+        <button class="stab" onclick="showTool('quiz',this)">🧠 Quiz</button>
+        <button class="stab" onclick="showTool('oral',this)">🎤 Oral</button>
+        <button class="stab" onclick="showTool('dissert',this)">✍️ Dissert</button>
+        <button class="stab" onclick="showTool('mindmap',this)">🗺️ Mind map</button>
+      </div>
+
+      <!-- FICHE -->
+      <div id="t-fiche">
+        <div class="card">
+          <div class="card-ttl">Cours ou fichier</div>
+          <div class="upload-zone" id="uz-fiche">
+            <input type="file" accept=".pdf,.txt,.png,.jpg,.jpeg" onchange="handleFile(this,'fiche')">
+            <div class="upload-icon">📎</div>
+            <div class="upload-txt">Clique ou glisse un PDF / image</div>
+            <div class="upload-sub">PDF, PNG, JPG, TXT</div>
+          </div>
+          <div class="chips" id="chips-fiche"></div>
+          <div class="upload-loading" id="ul-fiche">
+            <div class="sp"></div>
+            <p id="ul-fiche-msg">Lecture du fichier...</p>
+            <div class="ul-prog"><div class="ul-fill" id="ul-fiche-fill"></div></div>
+          </div>
+          <textarea id="tx-fiche" placeholder="Ou colle directement ton cours ici..."></textarea>
+          <div class="opts">
+            <span class="opts-lbl">Niveau :</span>
+            <button class="opt sel" onclick="selOpt(this,'fl')">Lycée</button>
+            <button class="opt" onclick="selOpt(this,'fl')">Licence</button>
+            <button class="opt" onclick="selOpt(this,'fl')">Master / École</button>
+          </div>
+          <button class="gen-btn" onclick="genFiche()">⚡ Générer la fiche</button>
+        </div>
+        <div class="loading" id="l-fiche">
+          <div class="sp"></div>
+          <p>Génération de ta fiche en cours...</p>
+          <div class="loading-steps">
+            <div class="ls" id="ls-f1">📖 Analyse du cours...</div>
+            <div class="ls" id="ls-f2">🔍 Extraction des points clés...</div>
+            <div class="ls" id="ls-f3">✍️ Rédaction de la fiche...</div>
+            <div class="ls" id="ls-f4">✅ Finalisation...</div>
+          </div>
+        </div>
+        <div class="result" id="r-fiche">
+          <div class="res-hdr">
+            <div class="res-ttl">📄 Fiche de révision</div>
+            <div class="res-acts">
+              <button class="act" onclick="savLib('fiche')">💾 Sauvegarder</button>
+              <button class="act" onclick="cpOut('fiche-out',this)">Copier</button>
+              <button class="act" onclick="rstTool('fiche')">Nouveau</button>
+            </div>
+          </div>
+          <div class="out-box" id="fiche-out"></div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div id="t-quiz" style="display:none">
+        <div class="card">
+          <div class="card-ttl">Cours à transformer en quiz</div>
+          <div class="upload-zone">
+            <input type="file" accept=".pdf,.txt,.png,.jpg,.jpeg" onchange="handleFile(this,'quiz')">
+            <div class="upload-icon">📎</div>
+            <div class="upload-txt">PDF / image / texte</div>
+          </div>
+          <div class="chips" id="chips-quiz"></div>
+          <div class="upload-loading" id="ul-quiz">
+            <div class="sp"></div>
+            <p>Lecture du fichier...</p>
+            <div class="ul-prog"><div class="ul-fill"></div></div>
+          </div>
+          <textarea id="tx-quiz" placeholder="Ou colle ton cours ici..."></textarea>
+          <div class="opts">
+            <span class="opts-lbl">Difficulté :</span>
+            <button class="opt sel" onclick="selOpt(this,'qd')">Facile</button>
+            <button class="opt" onclick="selOpt(this,'qd')">Moyen</button>
+            <button class="opt" onclick="selOpt(this,'qd')">Difficile</button>
+            <span class="opts-lbl" style="margin-left:6px">Questions :</span>
+            <button class="opt sel" onclick="selOpt(this,'qn')">5</button>
+            <button class="opt" onclick="selOpt(this,'qn')">8</button>
+            <button class="opt" onclick="selOpt(this,'qn')">12</button>
+          </div>
+          <button class="gen-btn" onclick="genQuiz()">🧠 Générer le quiz</button>
+        </div>
+        <div class="loading" id="l-quiz">
+          <div class="sp"></div>
+          <p>Création des questions...</p>
+          <div class="loading-steps">
+            <div class="ls" id="ls-q1">📖 Analyse du contenu...</div>
+            <div class="ls" id="ls-q2">❓ Génération des questions...</div>
+            <div class="ls" id="ls-q3">🎯 Ajout des explications...</div>
+          </div>
+        </div>
+        <div class="result" id="r-quiz">
+          <div class="res-hdr">
+            <div class="res-ttl">🧠 Quiz</div>
+            <div class="res-acts">
+              <button class="act" onclick="savLib('quiz')">💾 Sauvegarder</button>
+              <button class="act" onclick="rstTool('quiz')">Nouveau</button>
+            </div>
+          </div>
+          <div class="score-row" id="score-row" style="display:none">
+            <div><div class="score-big" id="score-big">0/0</div><div style="font-size:11px;color:var(--muted)">Score</div></div>
+            <div class="score-prog"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          </div>
+          <div class="qwrap" id="quiz-out"></div>
+        </div>
+      </div>
+
+      <!-- ORAL -->
+      <div id="t-oral" style="display:none">
+        <div class="card">
+          <div class="card-ttl">Type de préparation</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px" id="oral-types">
+            <div class="ci" onclick="setOralT(this,'plan')"><span class="ico">🗂️</span><div><div style="font-size:12px;font-weight:600">Plan détaillé</div><div style="font-size:10px;color:var(--muted)">Structure ton intervention</div></div><span class="cb"></span></div>
+            <div class="ci" onclick="setOralT(this,'questions')"><span class="ico">❓</span><div><div style="font-size:12px;font-weight:600">Questions jury</div><div style="font-size:10px;color:var(--muted)">Anticipe les questions</div></div><span class="cb"></span></div>
+            <div class="ci on" onclick="setOralT(this,'script')"><span class="ico">🎙️</span><div><div style="font-size:12px;font-weight:600">Script d'intro</div><div style="font-size:10px;color:var(--muted)">Accroche + annonce plan</div></div><span class="cb"></span></div>
+            <div class="ci" onclick="setOralT(this,'vocab')"><span class="ico">📚</span><div><div style="font-size:12px;font-weight:600">Vocabulaire clé</div><div style="font-size:10px;color:var(--muted)">Termes à maîtriser</div></div><span class="cb"></span></div>
+          </div>
+          <textarea id="tx-oral" style="min-height:80px" placeholder="Décris ton sujet ou colle ton cours..."></textarea>
+          <button class="gen-btn" onclick="genOral()">🎤 Préparer l'oral</button>
+        </div>
+        <div class="loading" id="l-oral"><div class="sp"></div><p>Préparation de ton oral...</p></div>
+        <div class="result" id="r-oral">
+          <div class="res-hdr">
+            <div class="res-ttl">🎤 Oral prêt</div>
+            <div class="res-acts">
+              <button class="act" onclick="savLib('oral')">💾 Sauvegarder</button>
+              <button class="act" onclick="cpOut('oral-out',this)">Copier</button>
+              <button class="act" onclick="rstTool('oral')">Nouveau</button>
+            </div>
+          </div>
+          <div class="out-box" id="oral-out"></div>
+        </div>
+      </div>
+
+      <!-- DISSERT -->
+      <div id="t-dissert" style="display:none">
+        <div class="card">
+          <div class="card-ttl">Sujet de dissertation</div>
+          <textarea id="tx-dissert" style="min-height:70px;resize:none" placeholder="Ex: Dans quelle mesure la mondialisation remet-elle en cause la souveraineté des États ?"></textarea>
+          <div class="opts">
+            <span class="opts-lbl">Matière :</span>
+            <button class="opt sel" onclick="selOpt(this,'dm')">SES/Éco</button>
+            <button class="opt" onclick="selOpt(this,'dm')">Français</button>
+            <button class="opt" onclick="selOpt(this,'dm')">Histoire</button>
+            <button class="opt" onclick="selOpt(this,'dm')">Philo</button>
+            <button class="opt" onclick="selOpt(this,'dm')">Droit</button>
+            <button class="opt" onclick="selOpt(this,'dm')">Management</button>
+          </div>
+          <button class="gen-btn" onclick="genDissert()">✍️ Générer le plan</button>
+        </div>
+        <div class="loading" id="l-dissert">
+          <div class="sp"></div>
+          <p>Construction du plan dialectique...</p>
+          <div class="loading-steps">
+            <div class="ls" id="ls-d1">🔍 Analyse du sujet...</div>
+            <div class="ls" id="ls-d2">📝 Thèse / Antithèse...</div>
+            <div class="ls" id="ls-d3">🔗 Synthèse + exemples...</div>
+          </div>
+        </div>
+        <div class="result" id="r-dissert">
+          <div class="res-hdr">
+            <div class="res-ttl">✍️ Plan de dissertation</div>
+            <div class="res-acts">
+              <button class="act" onclick="savLib('dissert')">💾 Sauvegarder</button>
+              <button class="act" onclick="cpOut('dissert-out',this)">Copier</button>
+              <button class="act" onclick="rstTool('dissert')">Nouveau</button>
+            </div>
+          </div>
+          <div class="out-box" id="dissert-out"></div>
+        </div>
+      </div>
+
+      <!-- MINDMAP -->
+      <div id="t-mindmap" style="display:none">
+        <div class="card">
+          <div class="card-ttl">Sujet à visualiser</div>
+          <textarea id="tx-mindmap" style="min-height:80px" placeholder="Colle ton cours ou décris le sujet..."></textarea>
+          <button class="gen-btn" onclick="genMindmap()">🗺️ Générer la mind map</button>
+        </div>
+        <div class="loading" id="l-mindmap"><div class="sp"></div><p>Création de la mind map...</p></div>
+        <div class="result" id="r-mindmap">
+          <div class="res-hdr">
+            <div class="res-ttl">🗺️ Mind Map</div>
+            <div class="res-acts">
+              <button class="act" onclick="savLib('mindmap')">💾 Sauvegarder</button>
+              <button class="act" onclick="rstTool('mindmap')">Nouveau</button>
+            </div>
+          </div>
+          <canvas id="mm-canvas" style="width:100%;height:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:block;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="panel" id="p-chat">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-ttl">Contexte cours (optionnel)</div>
+        <textarea id="chat-ctx" style="min-height:60px;resize:none" placeholder="Colle ton cours pour que le Prof IA se base dessus..."></textarea>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg ai"><div class="msg-b">Salut ! Je suis ton Prof IA 👋 Pose-moi n'importe quelle question sur tes cours, je t'explique tout clairement.</div></div>
+        </div>
+        <div class="chat-typing" id="chat-typing">Prof IA écrit...</div>
+        <div class="chat-in">
+          <textarea class="chat-field" id="chat-in" placeholder="Pose ta question..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="panel" id="p-lib">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700">Mes fiches 📂</div>
+          <div style="font-size:12px;color:var(--muted)" id="lib-count">0 document</div>
+        </div>
+        <button class="act" onclick="clearLib()" style="color:var(--red)">Tout effacer</button>
+      </div>
+      <div class="lib-grid" id="lib-grid"></div>
+      <div id="lib-viewer" style="display:none;margin-top:16px">
+        <div class="res-hdr">
+          <div class="res-ttl" id="lv-title"></div>
+          <div class="res-acts">
+            <button class="act" onclick="closeViewer()">← Retour</button>
+            <button class="act" onclick="cpOut('lv-content',this)">Copier</button>
+          </div>
+        </div>
+        <div class="out-box" id="lv-content"></div>
+      </div>
+    </div>
+
+    <!-- POMODORO -->
+    <div class="panel" id="p-pomo">
+      <div class="card">
+        <div class="pomo-modes">
+          <button class="pmode sel" onclick="setPomoMode(this,25,5)">🍅 25/5</button>
+          <button class="pmode" onclick="setPomoMode(this,50,10)">🧠 50/10</button>
+          <button class="pmode" onclick="setPomoMode(this,15,5)">⚡ 15/5</button>
+        </div>
+        <div class="pomo-wrap">
+          <div class="pring">
+            <svg width="190" height="190" viewBox="0 0 190 190">
+              <circle class="pring-track" cx="95" cy="95" r="83"/>
+              <circle class="pring-prog" id="pring" cx="95" cy="95" r="83" stroke-dasharray="521" stroke-dashoffset="0"/>
+            </svg>
+            <div class="pring-inner">
+              <div class="ptime" id="ptime">25:00</div>
+              <div class="psub" id="psub">Focus</div>
+            </div>
+          </div>
+          <div class="pbtns">
+            <button class="pbtn start" id="pbtn-start" onclick="togPomo()">▶ Démarrer</button>
+            <button class="pbtn reset" onclick="rstPomo()">↺ Reset</button>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Sessions : <strong id="pomo-sess">0</strong></div>
+        </div>
+        <div class="card-ttl">Ambiance sonore</div>
+        <div class="sound-grid">
+          <button class="snd" onclick="togSound(this,'rain')">🌧️ Pluie</button>
+          <button class="snd" onclick="togSound(this,'waves')">🌊 Vagues</button>
+          <button class="snd" onclick="togSound(this,'forest')">🌲 Forêt</button>
+          <button class="snd" onclick="togSound(this,'cafe')">☕ Café</button>
+          <button class="snd" onclick="togSound(this,'white')">🔊 Blanc</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODO -->
+    <div class="panel" id="p-todo">
+      <div class="todo-cats">
+        <button class="tcat sel" onclick="filterTodo(this,'all')">Tout</button>
+        <button class="tcat" onclick="filterTodo(this,'Maths')">📐 Maths</button>
+        <button class="tcat" onclick="filterTodo(this,'Français')">📝 Français</button>
+        <button class="tcat" onclick="filterTodo(this,'Histoire')">📜 Histoire</button>
+        <button class="tcat" onclick="filterTodo(this,'Éco')">📊 Éco</button>
+        <button class="tcat" onclick="filterTodo(this,'Autre')">📌 Autre</button>
+      </div>
+      <div class="todo-in-row">
+        <input type="text" id="todo-in" placeholder="Ajouter une tâche..." onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="tadd" onclick="addTodo()">+</button>
+      </div>
+      <div class="tlist" id="tlist"></div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="panel" id="p-cal">
+      <div class="cal-hdr">
+        <button class="cal-nav" onclick="chMonth(-1)">←</button>
+        <div class="cal-month-ttl" id="cal-ttl"></div>
+        <button class="cal-nav" onclick="chMonth(1)">→</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div style="margin-top:20px">
+        <div class="card-ttl" style="margin-bottom:10px">Ajouter un événement</div>
+        <div style="display:flex;gap:7px;margin-bottom:14px">
+          <input type="text" id="cal-ev-txt" placeholder="Exam, révision, rendu...">
+          <input type="date" id="cal-ev-date" style="width:150px">
+          <button class="gen-btn" style="width:auto;margin:0;padding:10px 14px" onclick="addCalEv()">+</button>
+        </div>
+        <div id="cal-evs"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="panel" id="p-stats">
+      <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:16px">Mes stats 🏆</div>
+      <div class="stats-g">
+        <div class="stat-c"><div class="stat-v" id="sv-fiches">0</div><div class="stat-l">Fiches</div></div>
+        <div class="stat-c"><div class="stat-v" id="sv-quiz">0</div><div class="stat-l">Quiz</div></div>
+        <div class="stat-c"><div class="stat-v" id="sv-pomo">0</div><div class="stat-l">Pomodoro</div></div>
+      </div>
+      <div class="card-ttl" style="margin:16px 0 12px">Badges</div>
+      <div class="badges-g" id="badges-g"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div class="botnav">
+    <button class="bn active" onclick="showPanel('tools',this)" id="bn-tools">
+      <span class="bn-icon">🛠️</span><span class="bn-label">Outils</span>
+    </button>
+    <button class="bn" onclick="showPanel('chat',this)" id="bn-chat">
+      <span class="bn-icon">💬</span><span class="bn-label">Prof IA</span>
+    </button>
+    <button class="bn" onclick="showPanel('lib',this)" id="bn-lib">
+      <span class="bn-icon">📂</span><span class="bn-label">Fiches</span>
+    </button>
+    <button class="bn" onclick="showPanel('pomo',this)" id="bn-pomo">
+      <span class="bn-icon">⏱️</span><span class="bn-label">Focus</span>
+    </button>
+    <button class="bn" onclick="showPanel('todo',this)" id="bn-todo">
+      <span class="bn-icon">✅</span><span class="bn-label">To-do</span>
+    </button>
+    <button class="bn" onclick="showPanel('cal',this)" id="bn-cal">
+      <span class="bn-icon">📅</span><span class="bn-label">Agenda</span>
+    </button>
+    <button class="bn" onclick="showPanel('stats',this)" id="bn-stats">
+      <span class="bn-icon">🏆</span><span class="bn-label">Stats</span>
+    </button>
+  </div>
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let S = {
+  apiKey:'', freeUses:0, maxFree:4,
+  xp:0, streak:0, lastActive:'',
+  stats:{fiches:0,quiz:0,pomo:0},
+  library:[], todos:[], calEvents:[],
+  pomoWork:25, pomoBreak:5,
+  oralType:'script', todoFilter:'all',
+  calMonth:new Date().getMonth(), calYear:new Date().getFullYear()
+};
+const save = () => localStorage.setItem('revia2',JSON.stringify(S));
+const load = () => { const d=localStorage.getItem('revia2'); if(d) Object.assign(S,JSON.parse(d)); };
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  load();
+  updateStreak();
+  setTimeout(() => {
+    document.getElementById('splash').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      const seen = localStorage.getItem('revia_ob');
+      if (seen) { launchApp(); }
+      else { document.getElementById('onboarding').classList.add('show'); }
+    }, 500);
+  }, 2200);
+});
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  if (S.lastActive === today) return;
+  if (S.lastActive === yesterday) S.streak++;
+  else if (S.lastActive !== today) S.streak = 1;
+  S.lastActive = today; save();
+}
+
+// ══════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════
+let obStep = 1;
+function toggleCI(el) { el.classList.toggle('on'); }
+function singleCI(el, group) {
+  el.closest('.cg').querySelectorAll('.ci').forEach(i => i.classList.remove('on'));
+  el.classList.add('on');
+}
+function goOB(n) {
+  document.getElementById('os'+obStep).classList.remove('active');
+  document.getElementById('od'+obStep).classList.add('done');
+  obStep = n;
+  document.getElementById('os'+n).classList.add('active');
+  document.getElementById('od'+n).classList.add('done');
+}
+function finishOB() {
+  const k = document.getElementById('ob-api').value.trim();
+  if (k) { S.apiKey = k; save(); }
+  const autre = document.getElementById('ob-autre').value.trim();
+  if (autre) { /* store if needed */ }
+  localStorage.setItem('revia_ob','1');
+  document.getElementById('onboarding').classList.remove('show');
+  launchApp();
+  setTimeout(startTuto, 400);
+}
+
+// ══════════════════════════════════════════
+// TUTORIAL
+// ══════════════════════════════════════════
+const TUTO_STEPS = [
+  {icon:'🛠️', title:'Les Outils IA', desc:'Génère des fiches, quiz, plans d\'oral et dissertations. Colle ton cours ou uploade un PDF — résultat en 10 secondes.'},
+  {icon:'💬', title:'Prof IA', desc:'Pose n\'importe quelle question à ton Prof IA. Colle ton cours en contexte pour des réponses ultra précises.'},
+  {icon:'⏱️', title:'Pomodoro Focus', desc:'Timer de révision avec sons d\'ambiance (pluie, vagues, forêt...). Travaille 25 min, pause 5 min, accumule des XP.'},
+  {icon:'✅', title:'To-do & Agenda', desc:'Note tes tâches de révision et planifie tes examens dans l\'agenda. Ne rate plus aucune deadline.'},
+  {icon:'📂', title:'Mes Fiches', desc:'Toutes tes fiches et quiz générés sont sauvegardés ici. Retrouve-les à tout moment, même hors connexion.'},
+];
+let tutoStep = 0;
+function startTuto() {
+  tutoStep = 0;
+  renderTuto();
+  document.getElementById('tutorial').classList.add('show');
+}
+function renderTuto() {
+  const s = TUTO_STEPS[tutoStep];
+  document.getElementById('tuto-num').textContent = `Étape ${tutoStep+1} / ${TUTO_STEPS.length}`;
+  document.getElementById('tuto-icon').textContent = s.icon;
+  document.getElementById('tuto-title').textContent = s.title;
+  document.getElementById('tuto-desc').textContent = s.desc;
+  const dots = document.getElementById('tuto-dots');
+  dots.innerHTML = TUTO_STEPS.map((_,i)=>`<div class="tuto-dot ${i===tutoStep?'on':''}"></div>`).join('');
+  const btn = document.getElementById('tuto-next-btn');
+  btn.textContent = tutoStep === TUTO_STEPS.length-1 ? 'Commencer ✓' : 'Suivant →';
+}
+function nextTuto() {
+  if (tutoStep < TUTO_STEPS.length-1) { tutoStep++; renderTuto(); }
+  else closeTuto();
+}
+function closeTuto() { document.getElementById('tutorial').classList.remove('show'); }
+
+// ══════════════════════════════════════════
+// APP LAUNCH
+// ══════════════════════════════════════════
+function launchApp() {
+  document.getElementById('app').classList.add('show');
+  updateUI();
+  renderTodos();
+  renderLib();
+  renderCalendar();
+  renderBadges();
+  if ('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+}
+function updateUI() {
+  document.getElementById('xp-val').textContent = S.xp;
+  document.getElementById('streak-val').textContent = S.streak;
+  document.getElementById('sv-fiches').textContent = S.stats.fiches;
+  document.getElementById('sv-quiz').textContent = S.stats.quiz;
+  document.getElementById('sv-pomo').textContent = S.stats.pomo;
+}
+function addXP(n) { S.xp += n; document.getElementById('xp-val').textContent = S.xp; save(); }
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bn').forEach(b => b.classList.remove('active'));
+  document.getElementById('p-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else document.getElementById('bn-'+name).classList.add('active');
+  if (name==='cal') renderCalendar();
+  if (name==='lib') renderLib();
+}
+function showTool(name, btn) {
+  ['fiche','quiz','oral','dissert','mindmap'].forEach(t => {
+    document.getElementById('t-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.getElementById('tool-tabs').querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function selOpt(btn, group) {
+  btn.closest('.opts').querySelectorAll(`.opt[onclick*="'${group}'"]`).forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function getOpt(group) {
+  const b = document.querySelector(`.opt.sel[onclick*="'${group}'"]`);
+  return b ? b.textContent.trim() : '';
+}
+
+// ══════════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════════
+let uploadedContent = {};
+
+function handleFile(input, tool) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const ulEl = document.getElementById('ul-'+tool);
+  const msgEl = document.getElementById('ul-'+tool+'-msg');
+  if (ulEl) {
+    ulEl.classList.add('show');
+    if (msgEl) msgEl.textContent = `Lecture de "${file.name}"...`;
+    const fillEl = ulEl.querySelector('.ul-fill');
+    if (fillEl) { fillEl.style.width='0%'; setTimeout(()=>{ fillEl.style.transition='width 2s ease'; fillEl.style.width='90%'; },100); }
+  }
+
+  const chipsEl = document.getElementById('chips-'+tool);
+  if (chipsEl) {
+    chipsEl.innerHTML = `<div class="chip">📄 ${file.name} <span id="chip-st-${tool}">⏳</span><button class="chip-del" onclick="removeChip(this,'${tool}')">×</button></div>`;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    if (file.type === 'application/pdf') {
+      // Store base64 for sonnet PDF reading
+      uploadedContent[tool] = { name: file.name, type: 'pdf', base64: data.split(',')[1] };
+    } else if (file.type.startsWith('image/')) {
+      uploadedContent[tool] = { name: file.name, type: 'image', base64: data.split(',')[1], mediaType: file.type };
+    } else {
+      uploadedContent[tool] = { name: file.name, type: 'text', text: data };
+    }
+    const st = document.getElementById('chip-st-'+tool);
+    if (st) st.textContent = '✓';
+    if (ulEl) ulEl.classList.remove('show');
+  };
+
+  reader.onerror = () => {
+    alert('Erreur lors de la lecture du fichier.');
+    if (ulEl) ulEl.classList.remove('show');
+  };
+
+  if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
+    reader.readAsDataURL(file);
+  } else {
+    reader.readAsText(file);
+  }
+}
+
+function removeChip(btn, tool) {
+  btn.closest('.chip').remove();
+  delete uploadedContent[tool];
+}
+
+// ══════════════════════════════════════════
+// API
+// ══════════════════════════════════════════
+function canUse() { return true; } // TEST MODE - no limit
+function useCredit() { /* TEST MODE - disabled */ }
+
+// Build message content array with optional file attachment
+function buildContent(prompt, uploaded) {
+  if (!uploaded) return { content: prompt, model: 'claude-haiku-4-5' };
+
+  if (uploaded.type === 'pdf') {
+    return {
+      model: 'claude-sonnet-4-20250514',
+      content: [
+        { type:'document', source:{ type:'base64', media_type:'application/pdf', data: uploaded.base64 } },
+        { type:'text', text: prompt }
+      ]
+    };
+  }
+  if (uploaded.type === 'image') {
+    return {
+      model: 'claude-sonnet-4-20250514',
+      content: [
+        { type:'image', source:{ type:'base64', media_type: uploaded.mediaType, data: uploaded.base64 } },
+        { type:'text', text: prompt }
+      ]
+    };
+  }
+  // plain text
+  return {
+    model: 'claude-haiku-4-5',
+    content: `[Fichier "${uploaded.name}":\n${uploaded.text.slice(0,6000)}\n]\n\n${prompt}`
+  };
+}
+
+async function callAI(prompt, uploaded) {
+  if (!canUse()) { document.getElementById('paywall').classList.add('show'); throw new Error('limit'); }
+  useCredit();
+  const { model, content } = buildContent(prompt, uploaded);
+  const res = await fetch('/api/chat', {
+    method:'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ model, max_tokens:1500, messages:[{ role:'user', content }] })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.content?.[0]?.text || '';
+}
+
+// ══════════════════════════════════════════
+// LOADING STEPS ANIMATION
+// ══════════════════════════════════════════
+function animLoadSteps(ids) {
+  ids.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('on');
+    }, i * 900);
+  });
+}
+
+// ══════════════════════════════════════════
+// FICHE
+// ══════════════════════════════════════════
+async function genFiche() {
+  const text = document.getElementById('tx-fiche').value.trim();
+  const uploaded = uploadedContent['fiche'];
+  if (!text && !uploaded) return alert('Colle ton cours ou uploade un fichier !');
+  const level = getOpt('fl') || 'Lycée';
+  const btn = document.querySelector('#t-fiche .gen-btn');
+  btn.disabled = true;
+  document.getElementById('l-fiche').classList.add('show');
+  document.getElementById('r-fiche').classList.remove('show');
+  animLoadSteps(['ls-f1','ls-f2','ls-f3','ls-f4']);
+  await new Promise(r => setTimeout(r, 50)); // force repaint
+  try {
+    const prompt = `Tu es un assistant de révision niveau "${level}". Génère une fiche de révision structurée à partir du contenu fourni.
+Format HTML avec h2/h3/ul/li/strong/p. Sections : 📌 Points clés | 📖 Définitions | 🔗 À retenir | ⚡ Astuces mémo.${text ? `\nCours :\n${text.slice(0,3000)}` : '\nAnalyse le document joint.'}`;
+    const r = await callAI(prompt, uploaded || null);
+    document.getElementById('fiche-out').innerHTML = r;
+    document.getElementById('r-fiche').classList.add('show');
+    S.stats.fiches++; addXP(20); save(); updateUI(); renderBadges();
+  } catch(e) { if (e.message!=='limit') alert('Erreur : '+e.message); }
+  document.getElementById('l-fiche').classList.remove('show');
+  ['ls-f1','ls-f2','ls-f3','ls-f4'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('on'); });
+  btn.disabled = false;
+}
+
+// ══════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════
+let quizData=[], quizAnswers={};
+async function genQuiz() {
+  const text = document.getElementById('tx-quiz').value.trim();
+  const uploaded = uploadedContent['quiz'];
+  if (!text && !uploaded) return alert('Colle ton cours !');
+  const diff = getOpt('qd')||'Moyen', n = getOpt('qn')||'5';
+  const btn = document.querySelector('#t-quiz .gen-btn');
+  btn.disabled = true;
+  document.getElementById('l-quiz').classList.add('show');
+  document.getElementById('r-quiz').classList.remove('show');
+  animLoadSteps(['ls-q1','ls-q2','ls-q3']);
+  await new Promise(r => setTimeout(r, 50));
+  try {
+    const prompt = `Génère exactement ${n} questions QCM niveau "${diff}". UNIQUEMENT JSON brut sans markdown.
+{"questions":[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]}
+${text ? `Cours :\n${text.slice(0,2500)}` : 'Analyse le document joint.'}`;
+    const raw = await callAI(prompt, uploaded || null);
+    quizData = JSON.parse(raw.replace(/```json|```/g,'').trim()).questions;
+    quizAnswers = {};
+    renderQuiz();
+    document.getElementById('r-quiz').classList.add('show');
+    S.stats.quiz++; addXP(15); save(); updateUI(); renderBadges();
+  } catch(e) { if (e.message!=='limit') alert('Erreur quiz : '+e.message); }
+  document.getElementById('l-quiz').classList.remove('show');
+  ['ls-q1','ls-q2','ls-q3'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('on'); });
+  btn.disabled = false;
+}
+function renderQuiz() {
+  document.getElementById('score-row').style.display = 'none';
+  document.getElementById('quiz-out').innerHTML = quizData.map((q,qi) => `
+    <div class="qcard" style="animation-delay:${qi*0.04}s">
+      <div class="qmeta">Question ${qi+1} / ${quizData.length}</div>
+      <div class="qtext">${q.question}</div>
+      <div class="qopts">${q.options.map((o,oi) =>
+        `<button class="qopt" id="qo-${qi}-${oi}" onclick="ansQ(${qi},${oi})">${o}</button>`
+      ).join('')}</div>
+      <div class="qexp" id="qe-${qi}">${q.explanation}</div>
+    </div>`).join('');
+}
+function ansQ(qi,oi) {
+  if (quizAnswers[qi] !== undefined) return;
+  quizAnswers[qi] = oi;
+  const q = quizData[qi];
+  for (let i=0;i<4;i++) {
+    const b = document.getElementById(`qo-${qi}-${i}`);
+    if (!b) continue;
+    b.disabled = true;
+    if (i===q.correct) b.classList.add('ok');
+    else if (i===oi) b.classList.add('ko');
+  }
+  document.getElementById(`qe-${qi}`).classList.add('show');
+  const ans = Object.keys(quizAnswers).length;
+  if (ans > 0) {
+    const ok = Object.entries(quizAnswers).filter(([i,o])=>quizData[i].correct===parseInt(o)).length;
+    const pct = Math.round(ok/quizData.length*100);
+    document.getElementById('score-row').style.display = 'flex';
+    document.getElementById('score-big').textContent = `${ok}/${quizData.length}`;
+    document.getElementById('score-fill').style.width = pct+'%';
+  }
+}
+
+// ══════════════════════════════════════════
+// ORAL
+// ══════════════════════════════════════════
+let oralType = 'script';
+function setOralT(el, type) {
+  document.getElementById('oral-types').querySelectorAll('.ci').forEach(i => i.classList.remove('on'));
+  el.classList.add('on');
+  oralType = type;
+}
+async function genOral() {
+  const text = document.getElementById('tx-oral').value.trim();
+  if (!text) return alert('Décris ton sujet !');
+  const prompts = {
+    plan:'Plan détaillé oral (intro+2-3 parties+conclusion). HTML h2/h3/ul/li.',
+    questions:'10 questions probables du jury avec piste de réponse 2 lignes chacune. HTML h3+p.',
+    script:'Script introduction orale 30-45 secondes (accroche+contexte+annonce plan). HTML p.',
+    vocab:'15 termes/concepts clés à maîtriser avec définition précise. HTML h3+p.'
+  };
+  const btn = document.querySelector('#t-oral .gen-btn');
+  btn.disabled = true;
+  document.getElementById('l-oral').classList.add('show');
+  document.getElementById('r-oral').classList.remove('show');
+  await new Promise(r => setTimeout(r, 50));
+  try {
+    const r = await callAI(`Coach prise de parole. ${prompts[oralType]}\nSujet : ${text.slice(0,2000)}`, null);
+    document.getElementById('oral-out').innerHTML = r;
+    document.getElementById('r-oral').classList.add('show');
+    addXP(15);
+  } catch(e) { if (e.message!=='limit') alert('Erreur'); }
+  document.getElementById('l-oral').classList.remove('show');
+  btn.disabled = false;
+}
+
+// ══════════════════════════════════════════
+// DISSERT
+// ══════════════════════════════════════════
+async function genDissert() {
+  const text = document.getElementById('tx-dissert').value.trim();
+  if (!text) return alert('Entre ton sujet !');
+  const mat = getOpt('dm')||'SES/Éco';
+  const btn = document.querySelector('#t-dissert .gen-btn');
+  btn.disabled = true;
+  document.getElementById('l-dissert').classList.add('show');
+  document.getElementById('r-dissert').classList.remove('show');
+  animLoadSteps(['ls-d1','ls-d2','ls-d3']);
+  await new Promise(r => setTimeout(r, 50));
+  try {
+    const r = await callAI(`Professeur de ${mat}. Plan dialectique complet (thèse/antithèse/synthèse) avec arguments+exemples concrets pour chaque sous-partie. Intro suggérée + conclusion. HTML h2/h3/ul/li/strong.\nSujet : ${text}`, null);
+    document.getElementById('dissert-out').innerHTML = r;
+    document.getElementById('r-dissert').classList.add('show');
+    addXP(20);
+  } catch(e) { if (e.message!=='limit') alert('Erreur'); }
+  document.getElementById('l-dissert').classList.remove('show');
+  ['ls-d1','ls-d2','ls-d3'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('on'); });
+  btn.disabled = false;
+}
+
+// ══════════════════════════════════════════
+// MINDMAP
+// ══════════════════════════════════════════
+async function genMindmap() {
+  const text = document.getElementById('tx-mindmap').value.trim();
+  if (!text) return alert('Entre un sujet !');
+  const btn = document.querySelector('#t-mindmap .gen-btn');
+  btn.disabled = true;
+  document.getElementById('l-mindmap').classList.add('show');
+  document.getElementById('r-mindmap').classList.remove('show');
+  try {
+    const raw = await callAI(`Génère une mind map. JSON brut uniquement.
+{"center":"Titre","branches":[{"label":"Branche 1","color":"#7c6af7","children":["idée 1","idée 2","idée 3"]},{"label":"Branche 2","color":"#f7c26a","children":["..."]},{"label":"Branche 3","color":"#4ade80","children":["..."]},{"label":"Branche 4","color":"#60a5fa","children":["..."]}]}
+Sujet : ${text.slice(0,2000)}`, null);
+    const data = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    drawMindmap(data);
+    document.getElementById('r-mindmap').classList.add('show');
+    addXP(15);
+  } catch(e) { if (e.message!=='limit') alert('Erreur mindmap'); }
+  document.getElementById('l-mindmap').classList.remove('show');
+  btn.disabled = false;
+}
+function drawMindmap(data) {
+  const canvas = document.getElementById('mm-canvas');
+  canvas.width = canvas.offsetWidth || 760;
+  canvas.height = 420;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cx = canvas.width/2, cy = canvas.height/2;
+  ctx.fillStyle='#7c6af7'; ctx.beginPath(); ctx.arc(cx,cy,48,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 12px Syne,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const words = data.center.split(' ');
+  words.forEach((w,i) => ctx.fillText(w,cx,cy+(i-(words.length-1)/2)*15));
+  const n = data.branches.length;
+  data.branches.forEach((br,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const bx = cx+Math.cos(angle)*155, by = cy+Math.sin(angle)*130;
+    ctx.strokeStyle = br.color+'70'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(angle)*50,cy+Math.sin(angle)*50); ctx.lineTo(bx,by); ctx.stroke();
+    ctx.fillStyle = br.color+'25'; ctx.strokeStyle = br.color; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(bx-52,by-15,104,30,7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#f0f0f8'; ctx.font='bold 11px Syne,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(br.label.length>14?br.label.slice(0,13)+'…':br.label,bx,by);
+    br.children.forEach((child,j) => {
+      const ca = angle + (j-(br.children.length-1)/2)*0.4;
+      const ex = bx+Math.cos(ca)*108, ey = by+Math.sin(ca)*65;
+      ctx.strokeStyle = br.color+'45'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(bx+Math.cos(ca)*53,by+Math.sin(ca)*16); ctx.lineTo(ex,ey); ctx.stroke();
+      ctx.fillStyle='#1a1a22'; ctx.strokeStyle=br.color+'35'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.roundRect(ex-42,ey-11,84,22,5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#b0b0c0'; ctx.font='10px Instrument Sans,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(child.length>13?child.slice(0,12)+'…':child,ex,ey);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// CHATBOT
+// ══════════════════════════════════════════
+async function sendChat() {
+  const inp = document.getElementById('chat-in');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addMsg('user', msg);
+  document.getElementById('chat-typing').style.display = 'block';
+  const ctx = document.getElementById('chat-ctx').value.trim();
+  const sys = ctx ? `Professeur bienveillant. Cours de référence : ${ctx.slice(0,1500)}\n` : 'Professeur bienveillant et pédagogue. ';
+  try {
+    const r = await callAI(sys+'Réponds clairement et concisément en français.\nQuestion : '+msg, null);
+    addMsg('ai', r.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'));
+    addXP(5);
+  } catch(e) { if (e.message!=='limit') addMsg('ai','⚠️ Configure ta clé API pour continuer.'); }
+  document.getElementById('chat-typing').style.display = 'none';
+  const msgs = document.getElementById('chat-msgs');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function addMsg(role, html) {
+  const msgs = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-b">${html}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ══════════════════════════════════════════
+// POMODORO
+// ══════════════════════════════════════════
+let pomoTimer=null, pomoSec=25*60, pomoRunning=false, pomoBreak=false, pomoSessions=0;
+let audioCtx=null, curSound=null;
+function setPomoMode(btn,work,brk) {
+  document.querySelectorAll('.pmode').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel');
+  S.pomoWork=work; S.pomoBreak=brk;
+  pomoSec=work*60; pomoBreak=false;
+  if(pomoRunning){clearInterval(pomoTimer);pomoRunning=false;document.getElementById('pbtn-start').textContent='▶ Démarrer';}
+  updPomo();
+}
+function togPomo() {
+  if (pomoRunning) {
+    clearInterval(pomoTimer); pomoRunning=false;
+    document.getElementById('pbtn-start').textContent='▶ Continuer';
+  } else {
+    pomoRunning=true;
+    document.getElementById('pbtn-start').textContent='⏸ Pause';
+    pomoTimer = setInterval(()=>{
+      pomoSec--;
+      updPomo();
+      if (pomoSec<=0) {
+        clearInterval(pomoTimer); pomoRunning=false;
+        if (!pomoBreak) {
+          pomoSessions++; document.getElementById('pomo-sess').textContent=pomoSessions;
+          S.stats.pomo++; addXP(10); save(); updateUI(); renderBadges();
+          pomoBreak=true; pomoSec=S.pomoBreak*60;
+          document.getElementById('psub').textContent='Pause 🌿';
+          document.getElementById('pbtn-start').textContent='▶ Pause';
+          try{if(Notification.permission==='granted')new Notification('RevIA',{body:'Pause ! Bien mérité 🌿'});}catch(e){}
+        } else {
+          pomoBreak=false; pomoSec=S.pomoWork*60;
+          document.getElementById('psub').textContent='Focus';
+          document.getElementById('pbtn-start').textContent='▶ Démarrer';
+        }
+        updPomo();
+      }
+    },1000);
+  }
+}
+function rstPomo() {
+  clearInterval(pomoTimer); pomoRunning=false;
+  pomoSec=S.pomoWork*60; pomoBreak=false;
+  document.getElementById('pbtn-start').textContent='▶ Démarrer';
+  document.getElementById('psub').textContent='Focus';
+  updPomo();
+}
+function updPomo() {
+  const m=String(Math.floor(pomoSec/60)).padStart(2,'0'), s=String(pomoSec%60).padStart(2,'0');
+  document.getElementById('ptime').textContent=`${m}:${s}`;
+  const total=(pomoBreak?S.pomoBreak:S.pomoWork)*60;
+  document.getElementById('pring').style.strokeDashoffset=521*(pomoSec/total);
+}
+function togSound(btn,type) {
+  const on=btn.classList.contains('on');
+  document.querySelectorAll('.snd').forEach(b=>b.classList.remove('on'));
+  if(curSound){try{curSound.stop();}catch(e){} curSound=null;}
+  if(on) return;
+  btn.classList.add('on');
+  try {
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+    const src=audioCtx.createBufferSource(); src.buffer=buf; src.loop=true;
+    const gain=audioCtx.createGain(); gain.gain.value=0.18;
+    const fMap={rain:[300,600],waves:[80,200],forest:[400,800,1500],cafe:[200,400],white:null};
+    let node=src;
+    (fMap[type]||[]).forEach(f=>{
+      const bpf=audioCtx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=f; bpf.Q.value=1;
+      node.connect(bpf); node=bpf;
+    });
+    node.connect(gain); gain.connect(audioCtx.destination); src.start();
+    curSound={stop:()=>{try{src.stop();}catch(e){}}};
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════
+// TODO
+// ══════════════════════════════════════════
+function renderTodos() {
+  const list = document.getElementById('tlist');
+  const items = S.todos.filter(t => S.todoFilter==='all' || t.cat===S.todoFilter);
+  if (!items.length) { list.innerHTML='<div style="text-align:center;padding:36px;color:var(--muted);font-size:13px">Aucune tâche ✨</div>'; return; }
+  list.innerHTML = items.map(t => `
+    <div class="titem ${t.done?'done':''}">
+      <div class="tchk" onclick="togTodo('${t.id}')">${t.done?'✓':''}</div>
+      <div class="ttxt">${t.text}</div>
+      ${t.cat&&t.cat!=='all'?`<span style="font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:4px">${t.cat}</span>`:''}
+      <button class="tdel" onclick="delTodo('${t.id}')">×</button>
+    </div>`).join('');
+}
+function addTodo() {
+  const inp=document.getElementById('todo-in'), text=inp.value.trim();
+  if(!text) return;
+  S.todos.push({id:Date.now().toString(),text,done:false,cat:S.todoFilter==='all'?'':S.todoFilter});
+  inp.value=''; save(); renderTodos(); addXP(2);
+}
+function togTodo(id) { const t=S.todos.find(t=>t.id===id); if(t){t.done=!t.done;save();renderTodos();} }
+function delTodo(id) { S.todos=S.todos.filter(t=>t.id!==id); save(); renderTodos(); }
+function filterTodo(btn,cat) {
+  document.querySelectorAll('.tcat').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel');
+  S.todoFilter=cat; renderTodos();
+}
+
+// ══════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════
+const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+function renderCalendar() {
+  document.getElementById('cal-ttl').textContent=`${MONTHS[S.calMonth]} ${S.calYear}`;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML=['L','M','M','J','V','S','D'].map(d=>`<div class="cal-dh">${d}</div>`).join('');
+  const first=new Date(S.calYear,S.calMonth,1);
+  const last=new Date(S.calYear,S.calMonth+1,0).getDate();
+  const startDow=(first.getDay()+6)%7;
+  const prevLast=new Date(S.calYear,S.calMonth,0).getDate();
+  const today=new Date();
+  for(let i=startDow-1;i>=0;i--){const d=document.createElement('div');d.className='cal-d other';d.textContent=prevLast-i;grid.appendChild(d);}
+  for(let d=1;d<=last;d++){
+    const el=document.createElement('div'); el.className='cal-d';
+    if(d===today.getDate()&&S.calMonth===today.getMonth()&&S.calYear===today.getFullYear()) el.classList.add('today');
+    const ds=`${S.calYear}-${String(S.calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(S.calEvents.some(e=>e.date===ds)) el.classList.add('has-ev');
+    el.textContent=d;
+    el.onclick=()=>{const evs=S.calEvents.filter(e=>e.date===ds);if(evs.length)alert(evs.map(e=>e.text).join('\n'));};
+    grid.appendChild(el);
+  }
+  renderCalEvs();
+}
+function chMonth(dir) {
+  S.calMonth+=dir;
+  if(S.calMonth>11){S.calMonth=0;S.calYear++;}
+  if(S.calMonth<0){S.calMonth=11;S.calYear--;}
+  renderCalendar();
+}
+function addCalEv() {
+  const txt=document.getElementById('cal-ev-txt').value.trim(), date=document.getElementById('cal-ev-date').value;
+  if(!txt||!date) return;
+  S.calEvents.push({id:Date.now().toString(),text:txt,date});
+  document.getElementById('cal-ev-txt').value=''; save(); renderCalendar();
+}
+function renderCalEvs() {
+  const el=document.getElementById('cal-evs');
+  el.innerHTML=S.calEvents.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`
+    <div class="cal-ev">
+      <div class="cal-ev-dot"></div>
+      <div style="flex:1;font-size:13px">${e.text}</div>
+      <div style="font-size:11px;color:var(--muted)">${e.date}</div>
+      <button class="act" onclick="delCalEv('${e.id}')" style="color:var(--red)">×</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px">Aucun événement.</div>';
+}
+function delCalEv(id) { S.calEvents=S.calEvents.filter(e=>e.id!==id); save(); renderCalendar(); }
+
+// ══════════════════════════════════════════
+// LIBRARY
+// ══════════════════════════════════════════
+const libMeta = {
+  fiche:{icon:'📄',label:'Fiche',badge:'bt-fiche',outId:'fiche-out'},
+  quiz:{icon:'🧠',label:'Quiz',badge:'bt-quiz',outId:null},
+  oral:{icon:'🎤',label:'Oral',badge:'bt-oral',outId:'oral-out'},
+  dissert:{icon:'✍️',label:'Dissert',badge:'bt-dissert',outId:'dissert-out'},
+  mindmap:{icon:'🗺️',label:'Mind map',badge:'bt-mindmap',outId:null},
+};
+function savLib(type) {
+  const m = libMeta[type];
+  let content = '';
+  if (m.outId) content = document.getElementById(m.outId).innerHTML;
+  else if (type==='quiz') content = quizData.map(q=>`<h3>${q.question}</h3><p>✓ ${q.options[q.correct]}</p><p><em>${q.explanation}</em></p>`).join('');
+  if (!content) return alert('Rien à sauvegarder.');
+  const title = prompt('Nom de cette fiche ?','Ma révision');
+  if (!title) return;
+  S.library.unshift({id:Date.now().toString(),type,title,content,date:new Date().toLocaleDateString('fr'),icon:m.icon,label:m.label,badge:m.badge});
+  save(); renderLib(); addXP(5); alert('✓ Sauvegardé !');
+}
+function renderLib() {
+  const grid=document.getElementById('lib-grid');
+  const count=document.getElementById('lib-count');
+  count.textContent=`${S.library.length} document${S.library.length>1?'s':''}`;
+  if (!S.library.length) {
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted);font-size:13px"><div style="font-size:36px;margin-bottom:10px;opacity:0.3">📂</div><p>Aucune fiche sauvegardée.<br>Génère du contenu et clique sur 💾</p></div>';
+    return;
+  }
+  grid.innerHTML=S.library.map(f=>`
+    <div class="lib-card" onclick="openFiche('${f.id}')">
+      <div class="lib-icon">${f.icon}</div>
+      <div class="lib-name">${f.title}</div>
+      <div class="lib-meta">${f.date}</div>
+      <span class="lib-badge ${f.badge}">${f.label}</span>
+    </div>`).join('');
+  document.getElementById('lib-grid').style.display='';
+  document.getElementById('lib-viewer').style.display='none';
+}
+function openFiche(id) {
+  const f=S.library.find(x=>x.id===id); if(!f) return;
+  document.getElementById('lv-title').textContent=f.icon+' '+f.title;
+  document.getElementById('lv-content').innerHTML=f.content;
+  document.getElementById('lib-grid').style.display='none';
+  document.getElementById('lib-viewer').style.display='block';
+}
+function closeViewer() { document.getElementById('lib-grid').style.display=''; document.getElementById('lib-viewer').style.display='none'; }
+function clearLib() { if(confirm('Effacer toutes les fiches ?')){S.library=[];save();renderLib();} }
+
+// ══════════════════════════════════════════
+// BADGES
+// ══════════════════════════════════════════
+const BADGES=[
+  {icon:'🌱',name:'Premier pas',cond:s=>s.stats.fiches>=1},
+  {icon:'🧠',name:'Quiz addict',cond:s=>s.stats.quiz>=5},
+  {icon:'⏱️',name:'Concentré',cond:s=>s.stats.pomo>=10},
+  {icon:'🔥',name:'7 jours',cond:s=>s.streak>=7},
+  {icon:'📚',name:'Bibliothèque',cond:s=>s.library.length>=10},
+  {icon:'✅',name:'Productif',cond:s=>s.todos.filter(t=>t.done).length>=20},
+];
+function renderBadges() {
+  document.getElementById('badges-g').innerHTML=BADGES.map(b=>`
+    <div class="bdg ${b.cond(S)?'unlocked':'locked'}">
+      <div class="bdg-icon">${b.icon}</div>
+      <div class="bdg-name">${b.name}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// PAYWALL
+// ══════════════════════════════════════════
+function selPlan(el,plan){document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
+function unlockKey() {
+  const k=document.getElementById('pw-api').value.trim();
+  if(k){S.apiKey=k;S.freeUses=0;save();document.getElementById('paywall').classList.remove('show');alert('✓ Clé enregistrée !');}
+  else alert('Entre ta clé API.');
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function rstTool(t) {
+  document.getElementById('r-'+t).classList.remove('show');
+  const txMap={fiche:'tx-fiche',quiz:'tx-quiz',oral:'tx-oral',dissert:'tx-dissert',mindmap:'tx-mindmap'};
+  if(txMap[t]) document.getElementById(txMap[t]).value='';
+}
+function cpOut(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  if(btn){btn.textContent='✓ Copié';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copier';btn.classList.remove('ok');},2000);}
+}
+
+updPomo();
+</script>
+</body>
+</html>
